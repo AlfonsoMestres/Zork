@@ -15,7 +15,7 @@ Entity::~Entity()
 
 void Entity::Look() const
 {
-	cout << name << description << endl;
+	cout << name << " " << description << endl;
 }
 
 ///Adoption - Chaning parents or giving parents to orphans

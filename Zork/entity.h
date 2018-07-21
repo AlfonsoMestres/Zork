@@ -6,6 +6,16 @@
 
 using namespace std;
 
+enum Entity_type 
+{
+	ITEM,
+	ROOM,
+	EXIT,
+	CREATURE,
+	PLAYER,
+	NPC
+};
+
 class Entity
 {
 public:
@@ -17,6 +27,7 @@ public:
 
 	string name;
 	string description;
+	Entity_type type;
 	Entity* parent;
 	list<Entity*> content; //this would be the childs of our entities, a room contains exits..and other kind of things like the player and stuff
 

@@ -1,5 +1,6 @@
 #pragma once
 #include "room.h"
+#include "player.h"
 #include "entity.h"
 
 enum Direction
@@ -15,14 +16,19 @@ enum Direction
 class Exit : public Entity
 {
 public:
-	Exit(const char* name, const char* description, Room* source, Room* destination);
+	Exit(const char* name, const char* description, Room* source, Room* destination, Item* itemToOpen, bool locked);
 	virtual ~Exit();
 
+	void Look() const;
 	string GetDestinationName();
+
+	void LockUnlock(Player* player);
 
 	Direction* direction;
 	Room* source;
 	Room* destination;
+	Item* itemToOpen;
+	bool locked;
 
 };
 

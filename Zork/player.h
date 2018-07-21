@@ -11,6 +11,11 @@ public:
 	virtual ~Player();
 
 	void Go(vector<string> args);
+	void Pick(vector<string> args);
+	void Drop(vector<string> args);
+	void Open(vector<string> args);
+	void Close(vector<string> args);
+	void Inventory();
 	Room* GetRoom();
 
 };
