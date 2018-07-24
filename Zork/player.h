@@ -15,6 +15,8 @@ public:
 	void Drop(vector<string> args);
 	void Open(vector<string> args);
 	void Close(vector<string> args);
+	void LookAt(vector<string> args);
+	void Use(vector<string> args);
 	void Inventory();
 	Room* GetRoom();
 

@@ -33,6 +33,17 @@ void Player::Go(vector<string> args)
 
 }
 
+void Player::LookAt(vector<string> args) {
+	Item* item = GetRoom()->FindItem(args);
+
+	if (item == NULL)
+	{
+		cout << "\nThere's no such item " << args[1] << ".\n";
+	} else {
+		item->Look();
+	}
+}
+
 void Player::Pick(vector<string> args) 
 {
 	Item* item = GetRoom()->FindItem(args);
@@ -41,8 +52,12 @@ void Player::Pick(vector<string> args)
 	{
 		cout << "\nThere's no such item " << args[1] << ".\n";
 	}
+	else if (!item->canBePicked) {
+		cout << "\nCan't be picked up" << ".\n";
+	}
 	else {
 		cout << "You picked up a " << item->name << endl;
+		item->GenerateItemIfNeeded();
 		item->Adoption(this);
 	}
 }
@@ -68,7 +83,7 @@ void Player::Drop(vector<string> args)
 }
 
 void Player::Open(vector<string> args) {
-	static bool exitExists;
+	bool exitExists = false;
 
 	for (list<Entity*>::iterator it = parent->content.begin(); it != parent->content.end(); ++it) {
 		if ((*it)->type == EXIT) {
@@ -90,9 +105,8 @@ void Player::Open(vector<string> args) {
 
 }
 
-void Player::Close(vector<string> args)
-{
-	static bool exitExists;
+void Player::Close(vector<string> args) {
+	bool exitExists = false;
 
 	for (list<Entity*>::iterator it = parent->content.begin(); it != parent->content.end(); ++it) {
 		if ((*it)->type == EXIT) {
@@ -111,6 +125,38 @@ void Player::Close(vector<string> args)
 
 	if (!exitExists)
 		cout << "There's no such thing to close" << endl;
+}
+
+void Player::Use(vector<string> args) {
+	Item* itemInBag = NULL;
+	Item* itemInRoom = NULL;
+
+	//Recorre el inventario
+	for (list<Entity*>::iterator it = content.begin(); it != content.end(); ++it) {
+		if ((*it)->name.compare(args[1]) == 0) {
+			itemInBag = ((Item*)*it);
+			break;
+		}
+	}
+
+	//recorre los elementos de la hab
+	for (list<Entity*>::iterator it = parent->content.begin(); it != parent->content.end(); ++it) {
+		if ((*it)->name.compare(args[2]) == 0) {
+			itemInRoom = ((Item*)*it);
+			break;
+		}
+	}
+
+	if (itemInBag && itemInRoom)
+		itemInBag->UseWith(itemInRoom);
+	
+
+	if (!itemInBag)
+		cout << "You don't have " << args[1] << endl;
+
+	if (!itemInRoom)
+		cout << "There's no such " << args[2] << endl;
+
 }
 
 

@@ -46,6 +46,24 @@ void Room::Look()
 
 }
 
+void Room::LookElement(vector<string> args)
+{
+	bool elementExists = false;
+
+	//Elements available in the room
+	for (list<Entity*>::iterator it = content.begin(); it != content.end(); ++it) {
+		if ((*it)->name.compare(args[1]) == 0) {
+			elementExists = true;
+			cout << (*it)->description << endl;
+			break;
+		}
+	}
+
+	if(!elementExists)
+		cout << "There's no " << args[1] << " to look at" << endl;
+
+}
+
 Exit* Room::FindExit(vector<string> args)
 {
 	for (list<Entity*>::iterator it = content.begin(); it != content.end(); ++it) {

@@ -21,9 +21,9 @@ int main()
 			break;
 
 		if (new_world.DoAction(player_input) == false)
-			cout << "You can't do that.\n";
+			cout << "You can't do that." << endl;
 	}
 	
-	cout << "\nThanks for playing, Bye!\n";
+	cout << "Thanks for playing!!!" << endl;
 	return 0;
 }
