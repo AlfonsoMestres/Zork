@@ -1,10 +1,8 @@
 #pragma once
 
-#include "entity.h"
+#include "creature.h"
 
-class Room;
-
-class Player : public Entity
+class Player : public Creature
 {
 public:
 	Player(const char* name, const char* description, Entity* parent);
@@ -13,12 +11,13 @@ public:
 	void Go(vector<string> args);
 	void Pick(vector<string> args);
 	void Drop(vector<string> args);
-	void Open(vector<string> args);
-	void Close(vector<string> args);
+	void Unlock(vector<string> args);
+	void Lock(vector<string> args);
 	void LookAt(vector<string> args);
 	void Use(vector<string> args);
+	void PickFrom(vector<string> args);
+	void Put(vector<string> args);
 	void Inventory();
-	Room* GetRoom();
 
 };
 

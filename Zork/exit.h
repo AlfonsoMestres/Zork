@@ -22,8 +22,6 @@ public:
 	void Look() const;
 	string GetDestinationName();
 
-	void LockUnlock(Player* player);
-
 	Direction* direction;
 	Room* source;
 	Room* destination;

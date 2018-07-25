@@ -15,24 +15,26 @@ World::World()
 	Room* hall = new Room("Hall", ", fancy forniture.. fancy drawings.. too much for Fred.");
 	Room* tv = new Room("Living room", ", a old room with a weird smell..also a giant TV in the middle (75 inches...!).");
 	Room* basement = new Room("Basement", ", even the basement smells like your best cologne...");
-	Room* freedom = new Room("Car", "You got your wallet! Time to scape!!!");
+	Room* freedom = new Room("Car", "You fixed your mistake!! Time to scape!!!");
 
-	Item* key = new Item("Key", "A little metallic key with a label, it says '2nd Key: Front door'.", NULL, true, NULL, NULL);
-	Item* doorMat = new Item("Doormat", "it has a drawing of two birds kissing, there's something under it.", front, true, NULL, NULL, key);
-	Item* fountain = new Item("Fountain", "This little guy peeing in the bowl makes you feel uncomfortable.", garden, false, NULL, NULL);
-	Item* bucket2 = new Item("Bucket", "Full of water.", NULL, true, NULL, NULL); //implementar items no pickeables pero si interactuables con otros
-	Item* bucket = new Item("Bucket", "Standard blue, cannot be recycled.", garden, true, fountain, bucket2); //implementar items no pickeables pero si interactuables con otros
-	Item* electric2 = new Item("Post", "No more buzzing inside... lights out!", NULL, false, NULL, NULL);
-	Item* electric = new Item("Post", "You can hear buzzing sounds inside.", street, false, bucket2, electric2);
-	Item* wallet = new Item("Wallet", "Its full of fake Ids.. except one.", front, true, NULL, NULL);
+	Item* key = new Item("Key", "A little metallic key with a label, it says '2nd Key: Front door'.", NULL, true, false);
+	Item* doorMat = new Item("Doormat", "it has a drawing of two birds kissing, there's something under it.", front, true, false, NULL, NULL, key); 
+	Item* fountain = new Item("Fountain", "This little guy peeing in the bowl makes you feel uncomfortable.", garden, false, false);
+	Item* bucket2 = new Item("Bucket", "full of water.", NULL, true, false);
+	Item* bucket = new Item("Bucket", "standard blue, cannot be recycled.", garden, true, false, fountain, bucket2); 
+	Item* electric2 = new Item("Post", "no more buzzing sound.", NULL, false, false);
+	Item* electric = new Item("Post", "You can hear buzzing sounds inside.", street, false, false, bucket2, electric2);
+	Item* closet = new Item("Closet", "It's half-open", tv, false, true);
+	Item* wallet = new Item("Wallet", "Its full of fake Ids.. except one.", closet, true, false);
 
 	//This needs to be implemented as return exits too
 	Exit* toStreet = new Exit("South", "A little stone road", front, street, NULL, false);
-	Exit* toGarden = new Exit("West", "A wall of flowers leading to the garden", front, garden, NULL, false);
+	Exit* toGarden = new Exit("West", "A wall of flowers", front, garden, NULL, false);
 	Exit* toHall = new Exit("North", "Big wooden door", front, hall, key, true);
 	Exit* toTv = new Exit("North", "Two cristal doors", hall, tv, NULL, false);
 	Exit* toBasement = new Exit("East", "A wooden door", tv, basement, NULL, false);
-	Exit* toFreedom = new Exit("South", "Your car, the engine is on..but you need your wallet", street, freedom, wallet, true);
+	Exit* toFreedom = new Exit("South", "car, the engine is on..but you need your wallet", street, freedom, wallet, true);
+	//TODO: exit through window, but not until lights out
 
 	//Return exits
 	Exit* toFront = new Exit("North", "A little stone road", street, front, NULL, false);
@@ -41,7 +43,7 @@ World::World()
 	Exit* toHall1 = new Exit("South", "Two cristal doors", tv, hall, NULL, false);
 	Exit* toTv1 = new Exit("West", "A wooden door", basement, tv, NULL, false);
 
-	user = new Player("You", "A thief with 0 experience at thieving", front);
+	user = new Player("You", "A thief with 0 experience at thieving", tv);
 
 	//In case we need to search for something globaly or to delete it for memory alloc
 	entities.push_back(front);
@@ -84,7 +86,7 @@ bool World::DoAction(string args) //Later this will be changed to directly an ar
 	{
 	case 1:
 		if (parsedArgs[0] == "look") {
-			cout << "You are in a "; user->GetRoom()->Look();
+			cout << "You are in "; user->GetRoom()->Look();
 		}
 		else if (parsedArgs[0] == "inventory") {
 			user->Inventory();
@@ -93,12 +95,11 @@ bool World::DoAction(string args) //Later this will be changed to directly an ar
 			ret = false;
 		break;
 	case 2:
-		if (parsedArgs[0] == "go")
-		{
+		if (parsedArgs[0] == "go") {
 			user->Go(parsedArgs);
 		}
 		else if (parsedArgs[0] == "look") {
-			user->GetRoom()->LookElement(parsedArgs);
+			user->LookAt(parsedArgs);
 		}
 		else if (parsedArgs[0] == "pick") {
 			user->Pick(parsedArgs);
@@ -106,11 +107,11 @@ bool World::DoAction(string args) //Later this will be changed to directly an ar
 		else if (parsedArgs[0] == "drop") {
 			user->Drop(parsedArgs);
 		}
-		else if (parsedArgs[0] == "open") {
-			user->Open(parsedArgs);
+		else if (parsedArgs[0] == "unlock") {
+			user->Unlock(parsedArgs);
 		} 
-		else if (parsedArgs[0] == "close") {
-			user->Close(parsedArgs);
+		else if (parsedArgs[0] == "lock") {
+			user->Lock(parsedArgs);
 		}
 		else
 			ret = false;
@@ -118,6 +119,12 @@ bool World::DoAction(string args) //Later this will be changed to directly an ar
 	case 3:
 		if (parsedArgs[0] == "use") {
 			user->Use(parsedArgs);
+		}
+		else if (parsedArgs[0] == "pick") {
+			user->PickFrom(parsedArgs);
+		}
+		else if (parsedArgs[0] == "put") {
+			user->Put(parsedArgs);
 		}
 		break;
 	default:

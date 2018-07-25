@@ -13,8 +13,6 @@ public:
 
 	void Look();
 
-	Exit* FindExit(vector<string> args);
-	Item* FindItem(vector<string> args);
 	void LookElement(vector<string> args);
 
 };

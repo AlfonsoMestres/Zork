@@ -2,10 +2,10 @@
 #include "item.h"
 
 
-Item::Item(const char* name, const char* description, Entity* parent, bool canBePicked, Item* combineWith, Item* resultCombination, Item* generateItem)
-	: Entity(name, description, parent), canBePicked(canBePicked), combineWith(combineWith), resultCombination(resultCombination), generateItem(generateItem)
+Item::Item(const char* name, const char* description, Entity* parent, bool canBePicked, bool canContain, Item* combineWith, Item* resultCombination, Item* generateItem)
+	: Entity(name, description, parent), canBePicked(canBePicked), canContain(canContain), combineWith(combineWith), resultCombination(resultCombination), generateItem(generateItem)
 {
-	type = ITEM;
+	entityType = ITEM;
 }
 
 
@@ -14,19 +14,31 @@ Item::~Item()
 }
 
 void Item::Look() const {
-	cout << "Its a " << name << ", " << description << endl;
+	cout << "A " << name << ", " << description << endl;
+	if (content.size() > 0) {
+		LookContent();
+	}
 }
 
-//Using inventory items with environment items
+void Item::LookContent() const {
+	if (content.size() > 0) {
+		cout << "Contains: " << endl;
+		for (list<Entity*>::const_iterator it = content.begin(); it != content.cend(); ++it)
+		{
+			cout << (*it)->name << endl;
+		}
+	}
+}
+
 void Item::UseWith(Item* itemUsingWith) {
-	if (combineWith == itemUsingWith || itemUsingWith->combineWith == this) {
+	if (combineWith == itemUsingWith || itemUsingWith->combineWith == this) { //this would get the generated element from one of the used elements (just 1 contains the element to generate)
 		if (itemUsingWith->resultCombination != NULL) {
 			itemUsingWith->resultCombination->Adoption(itemUsingWith->parent);
 			cout << "You used " << name << " with " << itemUsingWith->name << ", you now have a " << itemUsingWith->resultCombination->description << endl;
 			itemUsingWith->parent->content.remove(itemUsingWith);
 		} else {
 			resultCombination->Adoption(parent);
-			cout << "You used " << name << " with " << combineWith->name << ", you now have a " << resultCombination->description << endl;
+			cout << "You used " << name << " with " << combineWith->name << ", you its " << resultCombination->description << endl;
 			parent->content.remove(this);
 		}
 	} else {
@@ -38,5 +50,6 @@ void Item::GenerateItemIfNeeded() {
 	if (generateItem != NULL) {
 		generateItem->Adoption(parent);
 		cout << "There was a " << generateItem->name << " under it" << endl;
+		generateItem = NULL; //We empty the element so we avoid getting duplicate items
 	}
 }

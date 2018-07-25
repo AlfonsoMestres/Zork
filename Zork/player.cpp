@@ -4,28 +4,25 @@
 #include "item.h"
 #include "player.h"
 
-Player::Player(const char* name, const char* description, Entity* parent) : Entity(name,description,parent)
+Player::Player(const char* name, const char* description, Entity* parent) : Creature(name,description,parent)
 {
-	type = PLAYER;
+	entityType = PLAYER;
 }
 
 Player::~Player()
 {
 }
 
-void Player::Go(vector<string> args)
-{
+void Player::Go(vector<string> args) {
 
-	Exit* exit = GetRoom()->FindExit(args);
+	Exit* exit = (Exit*)GetRoom()->Find(args[1], EXIT);
 
 	if (exit == NULL)
 	{
-		cout << "\nThere is no Exit to " << args[1] << ".\n";
-	}
-	else if (exit->locked) {
-		cout << "The " << args[1] << "is locked" << endl;
-	}
-	else {
+		cout << "There is no Exit to " << args[1] << ".\n";
+	} else if (exit->locked) {
+		cout << "The " << args[1] << " is locked" << endl;
+	} else {
 		cout << "You walked to " << exit->GetDestinationName() << endl;
 		this->Adoption(exit->destination);
 		parent->Look();
@@ -34,11 +31,10 @@ void Player::Go(vector<string> args)
 }
 
 void Player::LookAt(vector<string> args) {
-	Item* item = GetRoom()->FindItem(args);
+	Item* item = (Item*)FindInventoryAndRoom(args[1], ITEM);
 
-	if (item == NULL)
-	{
-		cout << "\nThere's no such item " << args[1] << ".\n";
+	if (item == NULL) {
+		cout << "There's no such item " << args[1] << ".\n";
 	} else {
 		item->Look();
 	}
@@ -46,16 +42,13 @@ void Player::LookAt(vector<string> args) {
 
 void Player::Pick(vector<string> args) 
 {
-	Item* item = GetRoom()->FindItem(args);
+	Item* item = (Item*)GetRoom()->Find(args[1], ITEM);
 
-	if (item == NULL)
-	{
+	if (item == NULL) {
 		cout << "\nThere's no such item " << args[1] << ".\n";
-	}
-	else if (!item->canBePicked) {
+	} else if (!item->canBePicked) {
 		cout << "\nCan't be picked up" << ".\n";
-	}
-	else {
+	} else {
 		cout << "You picked up a " << item->name << endl;
 		item->GenerateItemIfNeeded();
 		item->Adoption(this);
@@ -64,119 +57,137 @@ void Player::Pick(vector<string> args)
 
 void Player::Drop(vector<string> args)
 {
-	static bool itemExists;
+	Item* item = (Item*)Find(args[1], ITEM);
 
-	for (list<Entity*>::iterator it = content.begin(); it != content.end(); ++it) {
-		if ((*it)->type == ITEM) {
-			if ((*it)->name.compare(args[1]) == 0) {
-				itemExists = true;
-				cout << "You dropped the " << (*it)->name << endl;
-				(*it)->Adoption(parent);
-				break;
-			}
-		}
-	}
-	
-	if (!itemExists)
+	if (item == NULL) {
 		cout << "You don't have " << args[1] << " to drop." << endl;
+	}
+	else {
+		cout << "You dropped the " << item->name << endl;
+		item->Adoption(parent);
+	}
 
 }
 
-void Player::Open(vector<string> args) {
-	bool exitExists = false;
+void Player::Unlock(vector<string> args) {
 
-	for (list<Entity*>::iterator it = parent->content.begin(); it != parent->content.end(); ++it) {
-		if ((*it)->type == EXIT) {
-			if ((*it)->name.compare(args[1]) == 0) {
-				exitExists = true;
-				Exit* exit = (Exit*)*it; //This should be an entity, to be able to lock or unlock stuff like chests and lockers... etc
-				if (!exit->locked) {
-					cout << "Already open!" << endl;
-					break;
-				}
-				exit->LockUnlock(this);
-				break;
+	Exit* exit = (Exit*)GetRoom()->Find(args[1], EXIT);
+
+	if (exit != NULL) {
+		if (exit->locked == false)
+			cout << "It's already open" << endl;
+		else {
+			Entity* keyToOpen = Find(exit->itemToOpen->name, ITEM); //If we need something like an Eye-scanner, we need this to be an Entity not an item
+			if (keyToOpen == NULL)
+				cout << "You need something to unlock the " << exit->description << endl;
+			else {
+				exit->locked = false;
+				cout << "You unlocked the " << exit->description << endl;
 			}
 		}
+			
 	}
-
-	if (!exitExists)
+	else {
 		cout << "There's no such thing to open" << endl;
+	}
 
 }
 
-void Player::Close(vector<string> args) {
-	bool exitExists = false;
+void Player::Lock(vector<string> args) {
+	Exit* exit = (Exit*)GetRoom()->Find(args[1], EXIT);
 
-	for (list<Entity*>::iterator it = parent->content.begin(); it != parent->content.end(); ++it) {
-		if ((*it)->type == EXIT) {
-			if ((*it)->name.compare(args[1]) == 0) {
-				exitExists = true;
-				Exit* exit = (Exit*)*it; //This should be an entity, to be able to lock or unlock stuff like chests and lockers... etc
-				if (exit->locked) {
-					cout << "Already closed!" << endl;
-					break;
-				}
-				exit->LockUnlock(this);
-				break;
+	if (exit != NULL) {
+		if (exit->locked)
+			cout << "It's already closed" << endl;
+		else {
+			Entity* keyToOpen = Find(exit->itemToOpen->name, ITEM); //If we need something like an Eye-scanner, we need this to be an Entity not an item
+			if (keyToOpen == NULL)
+				cout << "You need something to lock the " << exit->description << endl;
+			else {
+				exit->locked = true;
+				cout << "You locked the " << exit->description << endl;
 			}
 		}
-	}
 
-	if (!exitExists)
+	}
+	else {
 		cout << "There's no such thing to close" << endl;
+	}
 }
 
 void Player::Use(vector<string> args) {
-	Item* itemInBag = NULL;
-	Item* itemInRoom = NULL;
 
-	//Recorre el inventario
-	for (list<Entity*>::iterator it = content.begin(); it != content.end(); ++it) {
-		if ((*it)->name.compare(args[1]) == 0) {
-			itemInBag = ((Item*)*it);
-			break;
-		}
+	Item* item1 = (Item*)FindInventoryAndRoom(args[1], ITEM); //You can use your environment with the environment (items not pickeables)
+	if (item1 == NULL) {
+		cout << "There's no " << args[1] << endl;
+		return;
 	}
 
-	//recorre los elementos de la hab
-	for (list<Entity*>::iterator it = parent->content.begin(); it != parent->content.end(); ++it) {
-		if ((*it)->name.compare(args[2]) == 0) {
-			itemInRoom = ((Item*)*it);
-			break;
-		}
+	Item* item2 = (Item*)FindInventoryAndRoom(args[2], ITEM);
+	if (item2 == NULL) {
+		cout << "There's no " << args[2] << endl;
+		return;
 	}
 
-	if (itemInBag && itemInRoom)
-		itemInBag->UseWith(itemInRoom);
+	item1->UseWith(item2);
 	
+}
 
-	if (!itemInBag)
-		cout << "You don't have " << args[1] << endl;
+void Player::PickFrom(vector<string> args)
+{
+	Item* item1 = (Item*)FindInventoryAndRoom(args[1], ITEM);
+	if (item1 == NULL){
+		cout << "There's no " << args[1] << endl;
+		return;
+	}
+	
+	Item* item2 = (Item*)item1->Find(args[2], ITEM);
+	if (item2 == NULL) {
+		cout << "There's no " << args[2] << " inside " << item1->name << endl;
+		return;
+	}
 
-	if (!itemInRoom)
-		cout << "There's no such " << args[2] << endl;
+	if (item2->canBePicked) {
+		cout << "You picked up " << item2->name << " from inside of " << item1->name << endl;
+		item2->GenerateItemIfNeeded();
+		item2->Adoption(this);
+	}
+	else
+		cout << "Can't be picked up" << endl;
 
 }
 
+void Player::Put(vector<string> args) {
+	Item* item1 = (Item*)FindInventoryAndRoom(args[1], ITEM);
+	if (item1 == NULL) {
+		cout << "There's no " << args[1] << ".\n";
+		return;
+	}
+
+	Item* item2 = (Item*)FindInventoryAndRoom(args[2], ITEM);
+	if (item2 == NULL) {
+		cout << "There's no " << args[2] << ".\n";
+		return;
+	}
+
+	if (item1->canContain){
+		item2->Adoption(item1);
+		cout << "You put " << item2->name << " inside of " << item1->name << endl;
+	} else 
+		cout << "You cant put " << item2->name << " inside of " << item1->name << endl;
+
+}
 
 void Player::Inventory() {
-	static bool emptyBag = true;
-
-	for (list<Entity*>::iterator it = content.begin(); it != content.end(); ++it) {
-		if ((*it)->type == ITEM) {
-			if (emptyBag) {
-				cout << "Your inventory contains: " << endl;
+	if (content.size() > 0) {
+		cout << "Your inventory contains: " << endl;
+		for (list<Entity*>::iterator it = content.begin(); it != content.end(); ++it) {
+			if ((*it)->entityType == ITEM) {
+				((Item*)*it)->Look();
 			}
-			emptyBag = false;
-			((Item*)*it)->Look();
 		}
-	}
-	if (emptyBag) {
+	} else {
 		cout << "Your inventory is empty" << endl;
 	}
 }
 
-Room* Player::GetRoom() {
-	return (Room*)parent;
-}

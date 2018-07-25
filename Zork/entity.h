@@ -6,7 +6,7 @@
 
 using namespace std;
 
-enum Entity_type 
+enum Type 
 {
 	ITEM,
 	ROOM,
@@ -23,11 +23,14 @@ public:
 	virtual ~Entity();
 
 	void Look() const;
+	Entity* Find(string args, Type entityType);
+	Entity* Find(Entity* entity, Type entityType);
+	Entity* FindInventoryAndRoom(string args, Type entityType);
 	void Adoption(Entity* newParent);
 
 	string name;
 	string description;
-	Entity_type type;
+	Type entityType;
 	Entity* parent;
 	list<Entity*> content; //this would be the childs of our entities, a room contains exits..and other kind of things like the player and stuff
 

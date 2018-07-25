@@ -5,7 +5,7 @@
 
 Room::Room(const char* name, const char* description) : Entity(name, description, NULL)
 {
-	type = ROOM;
+	entityType = ROOM;
 }
 
 Room::~Room()
@@ -14,13 +14,13 @@ Room::~Room()
 
 void Room::Look()
 {
-	static bool exitExists;
-	static bool itemExists;
+	bool exitExists = false;
+	bool itemExists = false;
 	cout << name << description << endl;
-
+	 
 	//Exits availables
 	for (list<Entity*>::iterator it = content.begin(); it != content.end(); ++it) {
-		if ((*it)->type == EXIT) {
+		if ((*it)->entityType == EXIT) {
 			
 			if (!exitExists) {
 				exitExists = true;
@@ -33,7 +33,7 @@ void Room::Look()
 
 	//Items availables
 	for (list<Entity*>::iterator it = content.begin(); it != content.end(); ++it) {
-		if ((*it)->type == ITEM) {
+		if ((*it)->entityType == ITEM) {
 			if (!itemExists) {
 				itemExists = true;
 				cout << "Items:" << endl;
@@ -62,30 +62,4 @@ void Room::LookElement(vector<string> args)
 	if(!elementExists)
 		cout << "There's no " << args[1] << " to look at" << endl;
 
-}
-
-Exit* Room::FindExit(vector<string> args)
-{
-	for (list<Entity*>::iterator it = content.begin(); it != content.end(); ++it) {
-		if ((*it)->type == EXIT) {
-			if ((*it)->name.compare(args[1]) == 0) {
-				return (Exit*)*it;
-			};
-		}
-	}
-
-	return NULL;
-}
-
-Item* Room::FindItem(vector<string> args)
-{
-	for (list<Entity*>::iterator it = content.begin(); it != content.end(); ++it) {
-		if ((*it)->type == ITEM) {
-			if ((*it)->name.compare(args[1]) == 0) {
-				return (Item*)*it;
-			}
-		}
-	}
-
-	return NULL;
 }
