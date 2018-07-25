@@ -1,6 +1,7 @@
 #include <iostream>
 #include "exit.h"
 #include "item.h"
+#include "npc.h"
 #include "room.h"
 
 Room::Room(const char* name, const char* description) : Entity(name, description, NULL)
@@ -12,14 +13,15 @@ Room::~Room()
 {
 }
 
-void Room::Look()
+void Room::Look() const
 {
 	bool exitExists = false;
 	bool itemExists = false;
+	bool npcExists = false;
 	cout << name << description << endl;
 	 
 	//Exits availables
-	for (list<Entity*>::iterator it = content.begin(); it != content.end(); ++it) {
+	for (list<Entity*>::const_iterator it = content.begin(); it != content.end(); ++it) {
 		if ((*it)->entityType == EXIT) {
 			
 			if (!exitExists) {
@@ -32,7 +34,7 @@ void Room::Look()
 	}
 
 	//Items availables
-	for (list<Entity*>::iterator it = content.begin(); it != content.end(); ++it) {
+	for (list<Entity*>::const_iterator it = content.begin(); it != content.end(); ++it) {
 		if ((*it)->entityType == ITEM) {
 			if (!itemExists) {
 				itemExists = true;
@@ -43,15 +45,25 @@ void Room::Look()
 		}
 	}
 
-
+	//Npc availables
+	for (list<Entity*>::const_iterator it = content.begin(); it != content.end(); ++it) {
+		if ((*it)->entityType == NPC) {
+			if (!npcExists) {
+				npcExists = true;
+				cout << "NPC:" << endl;
+			}
+			Npc* ex = (Npc*)*it;
+			ex->Look();
+		}
+	}
 }
 
-void Room::LookElement(vector<string> args)
+void Room::LookElement(vector<string> args) const
 {
 	bool elementExists = false;
 
 	//Elements available in the room
-	for (list<Entity*>::iterator it = content.begin(); it != content.end(); ++it) {
+	for (list<Entity*>::const_iterator it = content.begin(); it != content.end(); ++it) {
 		if ((*it)->name.compare(args[1]) == 0) {
 			elementExists = true;
 			cout << (*it)->description << endl;

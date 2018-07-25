@@ -13,6 +13,30 @@ Player::~Player()
 {
 }
 
+void Player::LookAt(vector<string> args) const
+{
+
+	if (args[1].compare("me") == 0) {
+		Look();
+		return;
+	}
+
+	Item* item = (Item*)FindInventoryAndRoom(args[1], ITEM);
+
+	if (item == NULL) {
+		cout << "There's no such item " << args[1] << ".\n";
+	} else {
+		item->Look();
+	}
+}
+
+void Player::LookRoom() const 
+{
+	cout << "You are in ";
+	Room* room = (Room*)parent;
+	room->Look();
+}
+
 void Player::Go(vector<string> args) {
 
 	Exit* exit = (Exit*)GetRoom()->Find(args[1], EXIT);
@@ -28,16 +52,6 @@ void Player::Go(vector<string> args) {
 		parent->Look();
 	}
 
-}
-
-void Player::LookAt(vector<string> args) {
-	Item* item = (Item*)FindInventoryAndRoom(args[1], ITEM);
-
-	if (item == NULL) {
-		cout << "There's no such item " << args[1] << ".\n";
-	} else {
-		item->Look();
-	}
 }
 
 void Player::Pick(vector<string> args) 
@@ -77,7 +91,7 @@ void Player::Unlock(vector<string> args) {
 		if (exit->locked == false)
 			cout << "It's already open" << endl;
 		else {
-			Entity* keyToOpen = Find(exit->itemToOpen->name, ITEM); //If we need something like an Eye-scanner, we need this to be an Entity not an item
+			Entity* keyToOpen = Find(exit->itemToOpen, ITEM); //If we need something like an Eye-scanner, we need this to be an Entity not an item
 			if (keyToOpen == NULL)
 				cout << "You need something to unlock the " << exit->description << endl;
 			else {
@@ -93,14 +107,15 @@ void Player::Unlock(vector<string> args) {
 
 }
 
-void Player::Lock(vector<string> args) {
+void Player::Lock(vector<string> args)
+{
 	Exit* exit = (Exit*)GetRoom()->Find(args[1], EXIT);
 
 	if (exit != NULL) {
 		if (exit->locked)
 			cout << "It's already closed" << endl;
 		else {
-			Entity* keyToOpen = Find(exit->itemToOpen->name, ITEM); //If we need something like an Eye-scanner, we need this to be an Entity not an item
+			Entity* keyToOpen = Find(exit->itemToOpen, ITEM); //If we need something like an Eye-scanner, we need this to be an Entity not an item
 			if (keyToOpen == NULL)
 				cout << "You need something to lock the " << exit->description << endl;
 			else {
@@ -178,10 +193,10 @@ void Player::Put(vector<string> args) {
 
 }
 
-void Player::Inventory() {
+void Player::Inventory() const {
 	if (content.size() > 0) {
 		cout << "Your inventory contains: " << endl;
-		for (list<Entity*>::iterator it = content.begin(); it != content.end(); ++it) {
+		for (list<Entity*>::const_iterator it = content.begin(); it != content.end(); ++it) {
 			if ((*it)->entityType == ITEM) {
 				((Item*)*it)->Look();
 			}

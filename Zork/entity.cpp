@@ -19,17 +19,17 @@ void Entity::Look() const
 }
 
 ///Find - Search its inners with name
-Entity* Entity::Find(string args, Type entityType)
+Entity* Entity::Find(string args, Type entityType) const
 {
 	for (list<Entity*>::const_iterator it = content.begin(); it != content.cend(); ++it)
 	{
-		if (entityType != NULL) { //We can restrict search with an Entity Type
+		if (entityType != NULL) {
 			if ((*it)->entityType == entityType)
 			{
 				if ((*it)->name.compare(args) == 0)
 					return *it;
 			}
-		} else { //If not, we will search all the entities in the content
+		} else { 
 			if ((*it)->name.compare(args) == 0)
 				return *it;
 		}
@@ -40,7 +40,7 @@ Entity* Entity::Find(string args, Type entityType)
 }
 
 ///Find - Search its inners a match for the element
-Entity* Entity::Find(Entity* entity, Type entityType) 
+Entity* Entity::Find(Entity* entity, Type entityType) const
 {
 	for (list<Entity*>::const_iterator it = content.begin(); it != content.cend(); ++it) 
 	{
@@ -56,8 +56,23 @@ Entity* Entity::Find(Entity* entity, Type entityType)
 	return NULL;
 }
 
+
+///Find - Return the first element that fits the Entity Type
+Entity* Entity::Find(Type entityType) const
+{
+	for (list<Entity*>::const_iterator it = content.begin(); it != content.cend(); ++it)
+	{
+		if ((*it)->entityType == entityType)
+		{
+			return *it;
+		}
+	}
+
+	return NULL;
+}
+
 ///FindInventoryAndRoom - Search the inners of the inventory and the inners of its room
-Entity* Entity::FindInventoryAndRoom(string args, Type entityType)
+Entity* Entity::FindInventoryAndRoom(string args, Type entityType) const
 {
 	Entity* itemFound = Find(args, entityType);
 	if (itemFound != NULL)

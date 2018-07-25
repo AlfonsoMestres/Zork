@@ -1,10 +1,9 @@
 #include <iostream>
-#include <iterator>
-#include <sstream>
 #include "exit.h"
 #include "item.h"
 #include "room.h"
 #include "player.h"
+#include "npc.h"
 #include "world.h" 
 
 World::World()
@@ -28,22 +27,25 @@ World::World()
 	Item* wallet = new Item("Wallet", "Its full of fake Ids.. except one.", closet, true, false);
 
 	//This needs to be implemented as return exits too
-	Exit* toStreet = new Exit("South", "A little stone road", front, street, NULL, false);
-	Exit* toGarden = new Exit("West", "A wall of flowers", front, garden, NULL, false);
-	Exit* toHall = new Exit("North", "Big wooden door", front, hall, key, true);
-	Exit* toTv = new Exit("North", "Two cristal doors", hall, tv, NULL, false);
-	Exit* toBasement = new Exit("East", "A wooden door", tv, basement, NULL, false);
-	Exit* toFreedom = new Exit("South", "car, the engine is on..but you need your wallet", street, freedom, wallet, true);
-	//TODO: exit through window, but not until lights out
+	Exit* toStreet = new Exit("South", "A little stone road", front, street, NULL, false, false);
+	Exit* toGarden = new Exit("West", "A wall of flowers", front, garden, NULL, false, false);
+	Exit* toHall = new Exit("North", "Big wooden door", front, hall, key, true, false);
+	Exit* toTv = new Exit("North", "Two cristal doors", hall, tv, NULL, false, false);
+	Exit* toTv2 = new Exit("West", "An window", garden, tv, electric2, true, true);
+	Exit* toBasement = new Exit("East", "A wooden door", tv, basement, NULL, false, false);
+	Exit* toFreedom = new Exit("South", "car, the engine is on..but you need your wallet", street, freedom, wallet, true, false);
 
 	//Return exits
-	Exit* toFront = new Exit("North", "A little stone road", street, front, NULL, false);
-	Exit* toFront1 = new Exit("East", "A wall of flowers leading to the front door", garden, front, NULL, false);
-	Exit* toFront2 = new Exit("South", "Big wooden door", hall, front, key, false);
-	Exit* toHall1 = new Exit("South", "Two cristal doors", tv, hall, NULL, false);
-	Exit* toTv1 = new Exit("West", "A wooden door", basement, tv, NULL, false);
+	Exit* toFront = new Exit("North", "A little stone road", street, front, NULL, false, false);
+	Exit* toFront1 = new Exit("East", "A wall of flowers leading to the front door", garden, front, NULL, false, false);
+	Exit* toFront2 = new Exit("South", "Big wooden door", hall, front, key, false, false);
+	Exit* toHall1 = new Exit("South", "Two cristal doors", tv, hall, NULL, false, false);
+	Exit* toGarden1 = new Exit("West", "A electric window", tv, garden, electric2, true, true);
+	Exit* toTv1 = new Exit("West", "A wooden door", basement, tv, NULL, false, false);
 
-	user = new Player("You", "A thief with 0 experience at thieving", tv);
+	//TODO: Clock ticks into turns
+	Npc* fred = new Npc("Fred", "It's the house owner.", basement, true, toTv1, 4);
+	user = new Player("You", "A thief with 0 experience at thieving", front);
 
 	//In case we need to search for something globaly or to delete it for memory alloc
 	entities.push_back(front);
@@ -52,28 +54,44 @@ World::World()
 	entities.push_back(hall);
 	entities.push_back(tv);
 	entities.push_back(basement);
+	entities.push_back(freedom);
 
 	entities.push_back(key);
-	entities.push_back(electric);
+	entities.push_back(doorMat);
+	entities.push_back(bucket2);
 	entities.push_back(bucket);
+	entities.push_back(electric);
+	entities.push_back(electric2);
+	entities.push_back(closet);
+	entities.push_back(wallet);
 	entities.push_back(fountain);
 
 	entities.push_back(toStreet);
 	entities.push_back(toGarden);
 	entities.push_back(toHall);
 	entities.push_back(toTv);
+	entities.push_back(toTv2);
 	entities.push_back(toBasement);
+	entities.push_back(toFreedom);
 
 	entities.push_back(toFront);
 	entities.push_back(toFront1);
 	entities.push_back(toFront2);
 	entities.push_back(toHall1);
+	entities.push_back(toGarden1);
 	entities.push_back(toTv1);
+
+	entities.push_back(fred);
+	entities.push_back(user);
 
 }
 
 World::~World()
 {
+	for (std::vector<Entity*>::iterator it = entities.begin(); it != entities.end(); ++it) 
+		delete *it;
+
+	entities.clear();
 }
 
 bool World::DoAction(string args) //Later this will be changed to directly an array of args, so we dont need to use the ActionParser
@@ -86,7 +104,7 @@ bool World::DoAction(string args) //Later this will be changed to directly an ar
 	{
 	case 1:
 		if (parsedArgs[0] == "look") {
-			cout << "You are in "; user->GetRoom()->Look();
+			user->LookRoom();
 		}
 		else if (parsedArgs[0] == "inventory") {
 			user->Inventory();
@@ -126,6 +144,7 @@ bool World::DoAction(string args) //Later this will be changed to directly an ar
 		else if (parsedArgs[0] == "put") {
 			user->Put(parsedArgs);
 		}
+		
 		break;
 	default:
 		ret = false;

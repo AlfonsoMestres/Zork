@@ -8,25 +8,21 @@ Item::Item(const char* name, const char* description, Entity* parent, bool canBe
 	entityType = ITEM;
 }
 
-
 Item::~Item()
 {
 }
 
 void Item::Look() const {
 	cout << "A " << name << ", " << description << endl;
-	if (content.size() > 0) {
+	if (content.size() > 0)
 		LookContent();
-	}
 }
 
 void Item::LookContent() const {
 	if (content.size() > 0) {
 		cout << "Contains: " << endl;
 		for (list<Entity*>::const_iterator it = content.begin(); it != content.cend(); ++it)
-		{
 			cout << (*it)->name << endl;
-		}
 	}
 }
 
@@ -34,15 +30,15 @@ void Item::UseWith(Item* itemUsingWith) {
 	if (combineWith == itemUsingWith || itemUsingWith->combineWith == this) { //this would get the generated element from one of the used elements (just 1 contains the element to generate)
 		if (itemUsingWith->resultCombination != NULL) {
 			itemUsingWith->resultCombination->Adoption(itemUsingWith->parent);
-			cout << "You used " << name << " with " << itemUsingWith->name << ", you now have a " << itemUsingWith->resultCombination->description << endl;
+			cout << "Used " << name << " with " << itemUsingWith->name << ", now its " << itemUsingWith->resultCombination->description << endl;
 			itemUsingWith->parent->content.remove(itemUsingWith);
 		} else {
 			resultCombination->Adoption(parent);
-			cout << "You used " << name << " with " << combineWith->name << ", you its " << resultCombination->description << endl;
+			cout << "Used " << name << " with " << combineWith->name << ", now its " << resultCombination->description << endl;
 			parent->content.remove(this);
 		}
 	} else {
-		cout << "You can't use " << name << " with that." << endl;
+		cout << "Can't use " << name << " with that." << endl;
 	}
 }
 

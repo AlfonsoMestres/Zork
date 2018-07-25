@@ -1,15 +1,13 @@
 #include <iostream>
-#include <vector>
-#include "exit.h"
 #include "item.h"
+#include "exit.h"
+#include "world.h"
 #include "creature.h"
-
 
 Creature::Creature(const char* name, const char* description, Entity* parent) : Entity(name, description, parent)
 {
 	entityType = CREATURE;
 }
-
 
 Creature::~Creature()
 {
@@ -20,14 +18,32 @@ void Creature::Go(vector<string> args) {
 	Exit* exit = (Exit*)GetRoom()->Find(args[1], EXIT);
 
 	if (exit == NULL)
-	{
-		cout << name << " has no Exit to " << args[1] << ".\n"; //This will be erased, just for debugging NPCs
+		return;
+	
+	if (exit->locked) {
+		return;
 	}
-	else if (exit->locked) {
-		cout << name << " has the exit " << args[1] << " locked" << endl;  //This will be erased, just for debugging NPCs
+	
+	if (PlayerNear()) {
+		cout << name << " walked to " << exit->GetDestinationName() << endl;
+		this->Adoption(exit->destination);
 	}
-	else {
-		cout << name << " walked to " << exit->GetDestinationName() << endl;  //This would be just if hero is in the same room (otherwise its cheating)
+
+}
+
+void Creature::Go(Exit* toExit) {
+
+	Exit* exit = (Exit*)GetRoom()->Find(toExit,EXIT);
+
+	if (exit == NULL)
+		return;
+
+	if (exit->locked) {
+		return;
+	}
+
+	if (PlayerNear()) {
+		cout << name << " walked to " << exit->GetDestinationName() << endl;
 		this->Adoption(exit->destination);
 	}
 
@@ -40,22 +56,13 @@ void Creature::Unlock(vector<string> args) {
 	if (exit != NULL) {
 		if (exit->locked) {
 			Entity* keyToOpen = Find(exit->itemToOpen, ITEM);
-			if (keyToOpen == NULL)
-				cout << name << " needs something to unlock " << exit->description << endl;
-			else {
+			if (keyToOpen != NULL) {
 				exit->locked = false;
-				cout << name << " unlocked " << exit->description << endl; //Cheating!
+				if(PlayerNear())
+					cout << name << " unlocked " << exit->description << endl;
 			}
-			exit->locked = true;
-		}
-		else {
-			cout << "Creature, its already unlocked!" << endl;//Cheating!
 		}
 	}
-	else {
-		cout << "There's no such thing to unlock" << endl; //Cheating!
-	}
-
 }
 
 void Creature::Lock(vector<string> args) {
@@ -65,24 +72,21 @@ void Creature::Lock(vector<string> args) {
 	if (exit != NULL) {
 		if (exit->locked == false) { 
 			Entity* keyToOpen = Find(exit->itemToOpen, ITEM);
-			if (keyToOpen == NULL)
-				cout << name << " needs something to lock the " << exit->description << endl;
-			else {
+			if (keyToOpen != NULL) {
 				exit->locked = false;
-				cout << name << " locked the " << exit->description << endl; //Cheating!
+				if (PlayerNear())
+					cout << name << " locked the " << exit->description << endl; 
 			}
-			exit->locked = true;
-		}
-		else {
-			cout << "Creature, its already locked!" << endl;//Cheating!
 		}
 	}
-	else {
-		cout << "There's no such thing to lock" << endl; //Cheating!
-	}
-
 }
 
-Room* Creature::GetRoom() {
+Room* Creature::GetRoom() const 
+{
 	return (Room*)parent;
+}
+
+bool Creature::PlayerNear() const 
+{
+	return parent->Find(PLAYER) != NULL;
 }

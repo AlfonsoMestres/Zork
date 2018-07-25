@@ -23,9 +23,10 @@ public:
 	virtual ~Entity();
 
 	void Look() const;
-	Entity* Find(string args, Type entityType);
-	Entity* Find(Entity* entity, Type entityType);
-	Entity* FindInventoryAndRoom(string args, Type entityType);
+	Entity* Find(Type entityType) const;
+	Entity* Find(string args, Type entityType) const;
+	Entity* Find(Entity* entity, Type entityType) const;
+	Entity* FindInventoryAndRoom(string args, Type entityType) const;
 	void Adoption(Entity* newParent);
 
 	string name;

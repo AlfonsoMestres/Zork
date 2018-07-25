@@ -1,18 +1,20 @@
 #pragma once
 
+#include <list>
 #include "entity.h"
 
 class Exit;
 class Item;
 
+using namespace std;
+
 class Room : public Entity
 {
 public:
 	Room(const char* name, const char* description);
-	virtual ~Room();
+	~Room();
 
-	void Look();
-
-	void LookElement(vector<string> args);
+	void Look() const;
+	void LookElement(vector<string> args) const;
 
 };
